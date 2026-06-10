@@ -148,18 +148,21 @@ def extract_text_from_txt(uploaded_file) -> str:
 
 def extract_text_from_pdf(uploaded_file) -> str:
     if PdfReader is None:
-        st.error("PyPDF2 is not installed. Run: pip install PyPDF2")
+        st.error("PyPDF2 is not installed.")
         return ""
 
     reader = PdfReader(uploaded_file)
     pages = []
     for page in reader.pages:
         pages.append(page.extract_text() or "")
+    raw_text = "\n".joinn(pages)
+    cleaned_text = re.sub(r"\n+", " ", raw_text)
+    cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
     return "\n".join(pages)
 
 def extract_text_from_docx(uploaded_file) -> str:
     if docx is None:
-        st.error("python-docx is not installed. Run: pip install python-docx")
+        st.error("python-docx is not installed.")
         return ""
 
     document = docx.Document(uploaded_file)
