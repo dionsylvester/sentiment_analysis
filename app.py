@@ -155,10 +155,11 @@ def extract_text_from_pdf(uploaded_file) -> str:
     pages = []
     for page in reader.pages:
         pages.append(page.extract_text() or "")
-    raw_text = "\n".joinn(pages)
+        
+    raw_text = "\n".join(pages)
     cleaned_text = re.sub(r"\n+", " ", raw_text)
     cleaned_text = re.sub(r"\s+", " ", cleaned_text).strip()
-    return "\n".join(pages)
+    return cleaned_text
 
 def extract_text_from_docx(uploaded_file) -> str:
     if docx is None:
