@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import time
 import re
 import docx
 from PyPDF2 import PdfReader
@@ -41,13 +42,6 @@ def show_splash_screen():
             color: #475569;
             margin-bottom: 1.2rem;
         }
-        .feature-card {
-            padding: 1rem;
-            border-radius: 16px;
-            border: 1px solid #e5e7eb;
-            background-color: white;
-            height: 100%;
-        }
         </style>
         """,
         unsafe_allow_html=True
@@ -58,7 +52,7 @@ def show_splash_screen():
         <div class="splash-box">
             <div class="splash-title">Sentiment Analysis System</div>
             <div class="splash-subtitle">
-                Analyze sentences using LinearSVC + rule-based correction.
+                A tool that classifies sentences into positive, neutral, or negative categories using a LinearSVC algorithm trained on labeled datasets, enhanced with a rule-based correction system.
             </div>
         </div>
         """,
@@ -66,6 +60,7 @@ def show_splash_screen():
     )
 
     st.write("")
+
     if st.button("Start Analysis", type="primary", use_container_width=True):
         st.session_state["show_app"] = True
         st.rerun()
@@ -221,89 +216,60 @@ def analyze_long_text(text: str) -> pd.DataFrame:
 
 
 # MAIN APP
-mode = st.radio(
-    "Choose analysis mode:",
-    [
-        "Single Sentence",
-        "Full Text"
-    ],
+input_method = st.radio(
+    "Choose text input method:",
+    ["Paste Text", "Upload TXT / DOCX / PDF"],
     horizontal=True
 )
 
-if mode == "Single Sentence":
-    user_input = st.text_area(
-        "Input a sentence in English:",
-        height = 120,
-        placeholder="Example: The service was terrible and slow."
+full_text = ""
+
+if input_method == "Paste Text":
+    full_text = st.text_area(
+        "Paste your full text here:",
+        height = 220,
+        placeholder="Paste a paragraph, article, or long text.",
+        help="Hint: Separate multiple sentences using standard punctuation (. ! ?)."
     )
-
-    if st.button("Analyze Sentiment", type="primary"):
-        if user_input.strip() == "":
-            st.warning("Please input text.")
-        else:
-            prediction, cleaned_input, reasons = predict_sentiment(user_input)
-
-            st.subheader("Result:")
-            if prediction == "positive":
-                st.success("POSITIVE")
-            elif prediction == "negative":
-                st.error("NEGATIVE")
-            else:
-                st.info("NEUTRAL")
 else:
-    input_method = st.radio(
-        "Choose full text input method:",
-        ["Paste Text", "Upload TXT / DOCX / PDF"],
-        horizontal=True
+    uploaded_file = st.file_uploader(
+        "Upload a TXT, DOCX, or PDF file.",
+        type=["txt", "docx", "pdf"]
     )
 
-    full_text = ""
+    if uploaded_file is not None:
+        full_text = extract_text_from_file(uploaded_file)
 
-    if input_method == "Paste Text":
-        full_text = st.text_area(
-            "Paste your full text here:",
-            height = 220,
-            placeholder="Paste a paragraph, article, or long text."
-        )
-    else:
-        uploaded_file = st.file_uploader(
-            "Upload a TXT, DOCX, or PDF file.",
-            type=["txt", "docx", "pdf"]
-        )
-
-        if uploaded_file is not None:
-            full_text = extract_text_from_file(uploaded_file)
-
-            with st.expander("Preview extracted text"):
-                preview = full_text[:3000]
-                st.text(preview if preview else "No text extracted.")
+        with st.expander("Preview extracted text"):
+            preview = full_text[:3000]
+            st.text(preview if preview else "No text extracted.")
     
-    if st.button("Analyze Full Text", type="primary"):
-        if full_text.strip() == "":
-            st.warning("Please input or upload text first.")
+if st.button("Analyze Full Text", type="primary"):
+    if full_text.strip() == "":
+        st.warning("Please input or upload text first.")
+    else:
+        result_df = analyze_long_text(full_text)
+
+        if result_df.empty:
+            st.warning("No valid sentences found.")
         else:
-            result_df = analyze_long_text(full_text)
+            st.subheader("Summary")
 
-            if result_df.empty:
-                st.warning("No valid sentences found.")
-            else:
-                st.subheader("Summary")
+            sentiment_counts = result_df["sentiment"].value_counts()
+            total = len(result_df)
 
-                sentiment_counts = result_df["sentiment"].value_counts()
-                total = len(result_df)
+            col1, col2, col3 = st.columns(3)
+            col1.metric("Positive", int(sentiment_counts.get("positive", 0)))
+            col2.metric("Neutral", int(sentiment_counts.get("neutral", 0)))
+            col3.metric("Negative", int(sentiment_counts.get("negative", 0)))
 
-                col1, col2, col3 = st.columns(3)
-                col1.metric("Positive", int(sentiment_counts.get("positive", 0)))
-                col2.metric("Neutral", int(sentiment_counts.get("neutral", 0)))
-                col3.metric("Negative", int(sentiment_counts.get("negative", 0)))
+            st.subheader("Sentence-level Result")
 
-                st.subheader("Sentence-level Result")
+            display_df = result_df.drop(columns=["rule_reason"], errors="ignore")
+            display_df.index = display_df.index + 1
+            st.dataframe(display_df, use_container_width=True)
 
-                display_df = result_df.drop(columns=["rule_reason"], errors="ignore")
-                display_df.index = display_df.index + 1
-                st.dataframe(display_df, use_container_width=True)
-
-                csv = display_df.to_csv(index=True, index_label="no").encode("utf-8")
+            csv = display_df.to_csv(index=True, index_label="no").encode("utf-8")
 
 st.divider()
 
