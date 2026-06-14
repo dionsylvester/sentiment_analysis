@@ -21,8 +21,17 @@ st.set_page_config(
 st.markdown(
     """
     <style>
-    html, body, [data-testid="stMarkdownContainer"], p, div, label, span {
+    html, body, [data-testid="stMarkdownContainer"], p, label, .stMetric div {
         font-family: "SF Mono", SFMono-Regular, Monaco, "Fira Code", "Courier New", monospace !important;
+    }
+    
+    div[data-testid="stFileUploader"] button {
+        font-family: "SF Mono", SFMono-Regular, Monaco, monospace !important;
+        width: auto !important;
+        padding: 0px 14px !important;
+    }
+    div[data-testid="stFileUploader"] data-testid {
+        font-family: "SF Mono", SFMono-Regular, Monaco, monospace !important;
     }
     
     div[data-testid="stButton"] button[kind="primary"] {
@@ -105,7 +114,7 @@ def show_splash_screen():
         """
         <div class="splash-container">
             <div class="splash-box">
-                <div class="splash-title">// Sentiment Analysis System</div>
+                <div class="splash-title">Sentiment Analysis System</div>
                 <div class="splash-subtitle">
                     A tool that classifies sentences into positive, neutral, or negative categories using a LinearSVC algorithm trained on labeled datasets, enhanced with a rule-based correction system.
                 </div>
