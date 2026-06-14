@@ -18,6 +18,46 @@ st.set_page_config(
     layout="centered"
 )
 
+st.markdown(
+    """
+    <style>
+    html, body, [data-testid="stMarkdownContainer"], p, div, label, span {
+        font-family: "SF Mono", SFMono-Regular, Monaco, "Fira Code", "Courier New", monospace !important;
+    }
+    
+    div[data-testid="stButton"] button[kind="primary"] {
+        background-color: #06b6d4 !important;
+        color: #ffffff !important;
+        border: 1px solid #22d3ee !important;
+        font-family: "SF Mono", SFMono-Regular, Monaco, monospace !important;
+        font-weight: 700 !important;
+        letter-spacing: 0.05em !important;
+        box-shadow: 0 0 15px rgba(6, 182, 212, 0.2) !important;
+        transition: all 0.3s ease !important;
+    }
+    div[data-testid="stButton"] button[kind="primary"]:hover {
+        background-color: #0891b2 !important;
+        box-shadow: 0 0 25px rgba(6, 182, 212, 0.5) !important;
+        border-color: #67e8f9 !important;
+    }
+
+    div[data-testid="stVerticalBlockBorderWrapper"] > div > div:last-child div[data-testid="stButton"] button {
+        background-color: #1e293b !important;
+        color: #ef4444 !important;
+        border: 1px solid #ef4444 !important;
+        font-family: "SF Mono", SFMono-Regular, Monaco, monospace !important;
+        transition: all 0.3s ease !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] > div > div:last-child div[data-testid="stButton"] button:hover {
+        background-color: #ef4444 !important;
+        color: #ffffff !important;
+        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4) !important;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 
 # SPLASH SCREEN
 def show_splash_screen():
@@ -27,20 +67,34 @@ def show_splash_screen():
         .splash-box {
             padding: 2.2rem;
             border-radius: 24px;
-            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-            border: 1px solid #e5e7eb;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            border: 1px solid #1e293b;
             text-align: center;
             margin-top: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
         .splash-title {
+            font-family: "SF Mono", SFMono-Regular, Monaco, monospace;
             font-size: 2.2rem;
             font-weight: 800;
+            color: #06b6d4;
             margin-bottom: 0.5rem;
+            text-shadow: 0 0 20px rgba(6, 182, 212, 0.3);
         }
         .splash-subtitle {
+            font-family: "SF Mono", SFMono-Regular, Monaco, monospace;
             font-size: 1.05rem;
-            color: #475569;
+            color: #94a3b8;
             margin-bottom: 1.2rem;
+            line-height: 1.6;
+        }
+        .splash-container div[data-testid="stButton"] button {
+            background-color: #06b6d4 !important;
+            color: #ffffff !important;
+            border: 1px solid #22d3ee !important;
+            font-family: "SF Mono", SFMono-Regular, Monaco, monospace !important;
+            font-weight: 700 !important;
+            padding: 0.75rem 0px !important;
         }
         </style>
         """,
@@ -49,10 +103,12 @@ def show_splash_screen():
 
     st.markdown(
         """
-        <div class="splash-box">
-            <div class="splash-title">Sentiment Analysis System</div>
-            <div class="splash-subtitle">
-                A tool that classifies sentences into positive, neutral, or negative categories using a LinearSVC algorithm trained on labeled datasets, enhanced with a rule-based correction system.
+        <div class="splash-container">
+            <div class="splash-box">
+                <div class="splash-title">// Sentiment Analysis System</div>
+                <div class="splash-subtitle">
+                    A tool that classifies sentences into positive, neutral, or negative categories using a LinearSVC algorithm trained on labeled datasets, enhanced with a rule-based correction system.
+                </div>
             </div>
         </div>
         """,
@@ -244,7 +300,7 @@ else:
             preview = full_text[:3000]
             st.text(preview if preview else "No text extracted.")
     
-if st.button("Analyze Full Text", type="primary"):
+if st.button("Analyze Text", type="primary"):
     if full_text.strip() == "":
         st.warning("Please input or upload text first.")
     else:
